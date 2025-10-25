@@ -1,13 +1,11 @@
-import { defineConfig } from 'tsdown'
-
-export default defineConfig({
+export default {
+  target: 'es2018',
   entry: 'src/index.js',
   format: ['esm', 'cjs', 'iife'],
-  target: 'es2018',
   minify: false,
   sourcemap: false,
   outputOptions: {
-    name: 'createnox',
-    footer: `//! build at: ${new Date()}`
+    name: 'CreaTenoxUI',
+    banner: `//! latest build at: ${new Date()}`
   }
-})
+}

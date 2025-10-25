@@ -17,6 +17,13 @@ export const starterPlugins = [
   functionalVariant
 ]
 
+export const CreaTenoxPlugin = ({ aliases = {}, importantMark = 'both', plugins = [] } = {}) =>
+  MainPlugin({
+    aliases,
+    importantMark,
+    plugins: plugins.length === 0 ? [defaultUtilityProcessor] : plugins
+  })
+
 export function Main({
   corePlugins = [],
   utilities = {},
@@ -30,14 +37,7 @@ export function Main({
   const main = new TenoxUI({
     utilities,
     variants,
-    plugins: [
-      ...corePlugins,
-      MainPlugin({
-        aliases,
-        importantMark,
-        plugins: plugins.length === 0 ? [defaultUtilityProcessor] : plugins
-      })
-    ]
+    plugins: [CreaTenoxPlugin({ aliases, importantMark, plugins }), ...corePlugins]
   })
 
   const ui = new Renderer({ main, aliases, apply, parent: renderOutputParent })
