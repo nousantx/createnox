@@ -111,16 +111,6 @@ function processStringRules(rules, isImportant = false) {
   return result.trim().replace(/\s+/g, ' ')
 }
 
-export function generateSelector(className, originalClassName, isClassName = true) {
-  if (typeof className === 'string') {
-    return (isClassName ? '.' : '') + escapeSelector(className)
-  }
-
-  const { raw, prefix = '', suffix = '' } = className
-  const baseClass = raw || originalClassName
-  return `${prefix}.${escapeSelector(baseClass)}${suffix}`
-}
-
 export function processObjectRules(rules, isImportant = false) {
   return Object.entries(rules)
     .map(([property, value]) => {
@@ -134,9 +124,7 @@ export function processObjectRules(rules, isImportant = false) {
     .join('; ')
 }
 
-export const removeColonFromBracket = (item) => item.replaceAll('}; ', '} ')
-
-export function processRulesArray(rules, isImportant) {
+export function processArrayRules(rules, isImportant) {
   return removeColonFromBracket(
     rules
       .map((rule) => {
@@ -163,13 +151,25 @@ export function processRulesArray(rules, isImportant) {
   )
 }
 
+export function generateSelector(className, originalClassName, isClassName = true) {
+  if (typeof className === 'string') {
+    return (isClassName ? '.' : '') + escapeSelector(className)
+  }
+
+  const { raw, prefix = '', suffix = '' } = className
+  const baseClass = raw || originalClassName
+  return `${prefix}.${escapeSelector(baseClass)}${suffix}`
+}
+
+export const removeColonFromBracket = (item) => item.replaceAll('}; ', '} ')
+
 export function generateRuleBlock(rules, isImportant, rulesOnly = false) {
   if (!rules) return null
 
   const wrapRules = (content) => (rulesOnly ? content : `{ ${content} }`)
 
   if (Array.isArray(rules)) {
-    return wrapRules(processRulesArray(rules, isImportant))
+    return wrapRules(processArrayRules(rules, isImportant))
   }
 
   if (typeof rules === 'object') {

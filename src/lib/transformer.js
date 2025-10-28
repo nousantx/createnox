@@ -26,9 +26,12 @@ export function transform(data, name = 'createnox') {
 
       const rulesBlock = generateRuleBlock(item.rules, item.isImportant || false)
 
+      /*
       if (!rulesBlock || typeof item.rules?.property !== 'string') {
+        console.log(item)
         addInvalid(item)
       }
+      */
 
       if (variant) {
         const isObjectClassName = item.className && typeof item.className === 'object'
@@ -48,8 +51,11 @@ export function transform(data, name = 'createnox') {
         result ? results.rules.push(result) : addInvalid(item)
       } else {
         const selector = generateSelector(item.className, className, true)
-        if (rulesBlock) results.rules.push(`${selector} ${rulesBlock}`)
-        else addInvalid(item)
+        if (rulesBlock) {
+          results.rules.push(`${selector} ${rulesBlock}`)
+        } else {
+          addInvalid(item)
+        }
       }
     } catch (err) {
       console.error(`Error transforming ${item.className}:`, err)

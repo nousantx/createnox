@@ -10,21 +10,21 @@ import {
   defaultUtilityProcessor
 } from './plugins'
 
-export const starterPlugins = [
+const starterPlugins = [
   functionalUtilityPlugin,
   basicUtilityProcessorPlugin,
   arbitraryValuePlugin,
   functionalVariant
 ]
 
-export const CreaTenoxPlugin = ({ aliases = {}, importantMark = 'both', plugins = [] } = {}) =>
+const CreaTenoxPlugin = ({ aliases = {}, importantMark = 'both', plugins = [] } = {}) =>
   MainPlugin({
     aliases,
     importantMark,
     plugins: plugins.length === 0 ? [defaultUtilityProcessor] : plugins
   })
 
-export function Main({
+function Main({
   corePlugins = [],
   utilities = {},
   variants = {},
@@ -52,8 +52,7 @@ export function Main({
 
 export * from './utils'
 export * from './plugins'
-export { Renderer } from './lib/renderer'
-export { transform } from './lib/transformer'
-export * from './lib/matcher'
-export { default as Plugin } from './lib/plugin'
+export * from './lib'
+export { starterPlugins, CreaTenoxPlugin, Main }
+export { default as Plugin } from './lib/plugin.js'
 export default Main
