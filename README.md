@@ -16,13 +16,13 @@ A complete and ready-to-use TenoxUI plugin template for quick plugin development
 
 ```javascript
 import { TenoxUI } from '@tenoxui/core'
-import { CreaTenoxPlugin } from 'createnoxui-plugin'
+import { Plugin } from 'createnoxui-plugin'
 
 const ui = new TenoxUI({
   utilities: {
     bg: 'background'
   },
-  plugins: [CreaTenoxPlugin(/* createnox config here */)]
+  plugins: [Plugin(/* createnox config here */)]
 })
 
 console.log(ui.process('bg-red'))
@@ -48,10 +48,10 @@ Output :
 ### Quick Renderer
 
 ```javascript
-import { Main, starterPlugins as plugins } from 'createnoxui-plugin'
+import { init, starterPlugins as plugins } from 'createnoxui-plugin'
 
 // Use createnox TenoxUI builder
-const { ui } = Main({
+const { ui } = init({
   plugins,
   utilities: {
     // basic utility
@@ -92,9 +92,9 @@ Output :
 
 ```javascript
 import {
-  Main,
+  init,
   Plugin,
-  CreaTenoxPlugin,
+  Plugin,
   starterPlugins,
   transform,
   Renderer,
@@ -105,12 +105,12 @@ import {
 
 </details>
 
-### `Main`
+### `init`
 
 A ready to use styler with `TenoxUI`, `Renderer`, and `transformer` included, giving you quick style generation without much configuration. Configuration options :
 
 ```javascript
-function Main({
+function init({
   utilities = {},
   variants = {},
   aliases = {},
@@ -128,7 +128,7 @@ function Main({
 - `variants` - Define your variant rules here (e.g. `{ hover: '&:hover' }`)
 - `aliases` - Define your aliases that allow you to apply multiple classes into single utility (e.g. `{ 'my-class': 'bg-red hover:bg-blue' }`)
 - `apply` - Same as aliases, but it will create rules for certain selector and rendered immediately (e.g. `{ body: 'bg-red' }`)
-- `plugins` - Pass plugins for `CreaTenoxPlugin` here
+- `plugins` - Pass plugins for `Plugin` here
 - `corePlugins` - Pass plugins for `TenoxUI` here
 - `importantMark` - Where should the exclamation mark (`!`) allowed in the class names (available options: `both`: allow start and end, `start`: only start, `end`: only end. default: `both`)
 - `renderOutputParent` - The rendered style nested parent
@@ -136,9 +136,9 @@ function Main({
 Usage Example :
 
 ```javascript
-import { Main } from 'createnoxui-plugin'
+import { init } from 'createnoxui-plugin'
 
-const { ui, main, render, getData } = Main({
+const { ui, main, render, getData } = init({
   utilities: { bg: 'background' },
   variants: { hover: '&:hover' }
   // other configuration
@@ -210,7 +210,7 @@ Output :
 
 Just a reference to `Renderer.render` and `TenoxUI.process`
 
-### `Plugin` & `CreaTenoxPlugin`
+### `Plugin` & `Plugin`
 
 A single, configurable main `cratenox` plugin you ever need. Example Usage :
 
@@ -229,8 +229,8 @@ const ui = new TenoxUI({
 
 #### Configuration Options
 
-- `importantMark` - Same description in the `Main` function
-- `aliases` - The aliases for main `Renderer`, will be passed to the matcher's property pattern
+- `importantMark` - Same description in the `init` function
+- `aliases` - The aliases for main `Renderer`, will be passed to the matcher's utility pattern
 - `plugins` - Plugin inside plugin? Hell yeah. It offers simplified methods and APIs for creating TenoxUI plugins
 
 #### `Plugins`'s Plugins
@@ -251,7 +251,7 @@ const ui = new TenoxUI({
       plugins: [
         {
           name: 'add-matcher',
-          regexp: () => ({ property: ['my-class', '\\[[^\\]]+\\]+'] })
+          regexp: () => ({ utility: ['my-class', '\\[[^\\]]+\\]+'] })
         }
       ]
     })
@@ -264,7 +264,7 @@ console.log(ui.matcher)
 Output :
 
 ```
-/^(?:(?<variant>[\w.-]+):)?(?<property>bg|my-class|\[[^\]]+\]+)(?:-(?<value>[\w.-]+?))?$/
+/^(?:(?<variant>[\w.-]+):)?(?<utility>bg|my-class|\[[^\]]+\]+)(?:-(?<value>[\w.-]+?))?$/
 ```
 
 And without `createnox` plugin, you have to write this to get the same output :
@@ -277,7 +277,7 @@ const ui = new TenoxUI({
       name: 'add-matcher',
       regexp: ({ patterns }) => ({
         patterns: {
-          property: patterns.property + '|my-class|\\[[^\\]]+\\]+'
+          utility: patterns.utility + '|my-class|\\[[^\\]]+\\]+'
         }
       })
     }
@@ -291,7 +291,7 @@ Find plugin implementation examples [here](./examples/plugins).
 
 ### `starterPlugins`
 
-A curated started plugins for `CreaTenoxPlugin` or `Plugin`. What's inside :
+A curated started plugins for `Plugin` or `Plugin`. What's inside :
 
 - `basicUtilityProcessorPlugin` - Default, basic TenoxUI data-to-createnox transformer
 - `functionalUtilityPlugin` - Basic functional utility support
@@ -301,11 +301,11 @@ A curated started plugins for `CreaTenoxPlugin` or `Plugin`. What's inside :
 Example usage :
 
 ```javascript
-import { Main, starterPlugins as plugins } from 'createnoxui-plugin'
+import { init, starterPlugins as plugins } from 'createnoxui-plugin'
 
-const ui = Main({
+const ui = init({
   utilities: {
-    // basic utilities {type: property}
+    // basic utilities {type: cssProperty}
     bg: 'background',
 
     // static utilities
@@ -484,17 +484,17 @@ Helper functions to generate supported data pattern for the `transformer`. Usage
 
 ```javascript
 import {
-  Main,
+  init,
   createResult as pass,
   createErrorResult as fail,
   transform
 } from 'createnoxui-plugin'
 
-const ui = Main({
+const ui = init({
   plugins: [
     {
       name: 'create-data',
-      regexp: () => ({ property: ['class1', 'class2'] }),
+      regexp: () => ({ utility: ['class1', 'class2'] }),
       process(className) {
         if (className === 'class1') {
           return pass({ className, rules: { display: 'flex', color: 'blue' } })
