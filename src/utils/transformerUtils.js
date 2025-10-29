@@ -1,6 +1,14 @@
 import { escapeSelector } from './escape'
 
 /**
+ * Helper function to sanitize or remove duplication from -
+ * input class names for the Renderer and TenoxUI.process
+ */
+export const sanitize = (classNames) => [
+  ...new Set(Array.isArray(classNames) ? classNames : classNames.split(/\s+/))
+]
+
+/**
  * Check if the utility has important mark
  */
 export const isImportant = (className) => className.startsWith('!') || className.endsWith('!')
@@ -61,7 +69,7 @@ export function generateCSSRule(property, value, isImportant, localIsImportant) 
 /**
  * Helper function for processing string rules
  */
-function processStringRules(rules, isImportant = false) {
+export function processStringRules(rules, isImportant = false) {
   if (!isImportant) return rules
   const cleanRules = rules.trim().endsWith(';') ? rules.trim().slice(0, -1) : rules.trim()
   const withoutImportant = cleanRules.replaceAll(' !important', '')
@@ -111,6 +119,9 @@ function processStringRules(rules, isImportant = false) {
   return result.trim().replace(/\s+/g, ' ')
 }
 
+/**
+ * Helper function for processing object rules
+ */
 export function processObjectRules(rules, isImportant = false) {
   return Object.entries(rules)
     .map(([property, value]) => {
@@ -124,6 +135,9 @@ export function processObjectRules(rules, isImportant = false) {
     .join('; ')
 }
 
+/**
+ * Helper function for processing array rules
+ */
 export function processArrayRules(rules, isImportant) {
   return removeColonFromBracket(
     rules
@@ -151,6 +165,9 @@ export function processArrayRules(rules, isImportant) {
   )
 }
 
+/**
+ * Helper function to generate selector
+ */
 export function generateSelector(className, originalClassName, isClassName = true) {
   if (typeof className === 'string') {
     return (isClassName ? '.' : '') + escapeSelector(className)
@@ -161,8 +178,12 @@ export function generateSelector(className, originalClassName, isClassName = tru
   return `${prefix}.${escapeSelector(baseClass)}${suffix}`
 }
 
+// Remove misplaced colons
 export const removeColonFromBracket = (item) => item.replaceAll('}; ', '} ')
 
+/**
+ * Helper function to generate rules block
+ */
 export function generateRuleBlock(rules, isImportant, rulesOnly = false) {
   if (!rules) return null
 
@@ -187,7 +208,12 @@ export function generateRuleBlock(rules, isImportant, rulesOnly = false) {
   return wrapRules(rules)
 }
 
+/**
+ * Helper function to process variants
+ */
 export function processVariantSelector(variant, selector, rules, classNameObject) {
+  if (!variant || typeof variant !== 'string') return null
+
   const getSelector = () =>
     classNameObject ? generateSelector(classNameObject, selector) : selector
 

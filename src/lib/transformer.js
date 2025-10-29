@@ -26,13 +26,6 @@ export function transform(data, name = 'createnox') {
 
       const rulesBlock = generateRuleBlock(item.rules, item.isImportant || false)
 
-      /*
-      if (!rulesBlock || typeof item.rules?.property !== 'string') {
-        console.log(item)
-        addInvalid(item)
-      }
-      */
-
       if (variant) {
         const isObjectClassName = item.className && typeof item.className === 'object'
         const result = isObjectClassName
@@ -69,3 +62,5 @@ export function transform(data, name = 'createnox') {
 
   return results
 }
+
+export const getRules = (data) => transform(data).rules.join('\n')

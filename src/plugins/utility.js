@@ -1,4 +1,10 @@
-import { createResult as pass, createErrorResult as fail, isImportant, escapeRegex } from '../utils'
+import {
+  createResult as pass,
+  createErrorResult as fail,
+  isImportant,
+  escapeRegex,
+  generateRuleBlock
+} from '../utils'
 import { escapeArbitrary } from './pluginUtils'
 
 /**
@@ -8,23 +14,31 @@ import { escapeArbitrary } from './pluginUtils'
 export const defaultUtilityProcessor = {
   name: 'nsx:default-utility-processor',
   utility: (ctx) => {
-    const { className, property, value } = ctx
-    return typeof property === 'string' // only accept string utility (e.g. {bg: 'background'})
-      ? pass({ ...ctx, rules: { property, value } })
-      : fail({ className, reason: `Typeof 'property' must be a string` })
+    const { className, utility, value } = ctx
+    return typeof utility === 'string' // only accept string utility (e.g. {bg: 'background'})
+      ? pass({ ...ctx, rules: { utility, value } })
+      : fail({ className, reason: `Typeof 'utility' must be a string` })
   }
 }
+
+const isDirect = (str) => str.includes(':')
 
 // basic utility processing implementation
 export const basicUtilityProcessorPlugin = {
   name: 'nsx:basic-utility-processor-example',
   utility(ctx) {
-    const { property, raw, value, className } = ctx
+    const { utility, raw, value, className } = ctx
 
-    let rules = // fallback value
-      typeof property === 'string' && property.includes(':') ? property : { property, value }
+    if (isDirect(utility) && value)
+      return fail({
+        className,
+        reason: `${raw[2]} utility can't have value, and ${value} is defined`
+      })
 
-    if (typeof property === 'object') {
+    let rules =
+      typeof utility === 'string' && isDirect(utility) ? utility : { property: utility, value } // fallback value
+
+    if (typeof utility === 'object' && !Array.isArray(utility)) {
       /**
        * Object type utility, e.g.
        * flex: {display: 'flex'}
@@ -44,7 +58,17 @@ export const basicUtilityProcessorPlugin = {
           `\`${raw[2]}\` utility can't have value, and \`${value}\` is defined.`
         )
       }
-      rules = property
+      rules = utility
+    } else if (Array.isArray(utility)) {
+      if (utility.length === 0)
+        return fail({ className, reason: 'Empty utility rules, nothing to do' })
+
+      const hasPlain = utility.some((i) => typeof i === 'string' && !i.includes(':'))
+
+      rules =
+        hasPlain && value
+          ? utility.map((i) => (typeof i === 'string' && !i.includes(':') ? `${i}: ${value}` : i))
+          : utility
     } else if (raw[2].startsWith('[') && raw[2].endsWith(']')) {
       /**
        * Tailwind CSS like arbitrary utility implementation.
@@ -59,8 +83,8 @@ export const basicUtilityProcessorPlugin = {
         .slice(1, -1)
         .split(',')
         .map((i) => {
-          const [property, value] = i.split(':')
-          return { property, value: escapeArbitrary(value) }
+          const [utility, value] = i.split(':')
+          return { utility, value: escapeArbitrary(value) }
         })
     }
 
@@ -69,7 +93,7 @@ export const basicUtilityProcessorPlugin = {
   /**
    * Add new utility patterns to the main matcher to support arbitrary utility
    */
-  regexp: () => ({ property: ['\\[[^\\]]+\\]+'] })
+  regexp: () => ({ utility: ['\\[[^\\]]+\\]+'] })
 }
 
 /**
@@ -78,12 +102,12 @@ export const basicUtilityProcessorPlugin = {
 export const functionalUtilityPlugin = {
   name: 'nsx:functional-utility-feature-example',
   utility: (ctx) => {
-    const { property, value, raw } = ctx
+    const { utility, value, raw } = ctx
 
     // Check if the utility is a function
-    if (typeof property === 'function') {
+    if (typeof utility === 'function') {
       // Run the utility as function
-      const rules = property(value, raw)
+      const rules = utility(value, raw)
 
       return rules
         ? typeof rules === 'object' && 'rules' in rules && !Array.isArray(rules)

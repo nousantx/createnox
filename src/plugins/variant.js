@@ -1,6 +1,6 @@
 import { createMatcher } from '@tenoxui/core'
 
-export function functionalVariant() {
+export function functionalVariantPlugin() {
   let variants, regex
   return {
     name: 'nsx:functional-variant-processor',
@@ -12,7 +12,6 @@ export function functionalVariant() {
     variant(v) {
       const [, , variant, value] = v.match(regex)
       if (typeof variants[variant] === 'function') return variants[variant](value)
-      // else return variants[variant]
     }
   }
 }
